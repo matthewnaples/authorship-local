@@ -1,0 +1,14 @@
+/* chainlit footer */
+.watermark {
+    visibility: hidden !important;
+}
+
+a[href*='https://github.com/Chainlit/chainlit'] {
+    visibility: hidden;
+}
+/* #delete-thread{
+    display: none !important;
+} */
+/* body {
+    background: pink !important;
+} */
