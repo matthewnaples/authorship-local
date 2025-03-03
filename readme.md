@@ -1,5 +1,5 @@
 # authorship-local
-
+todo : add chainlit secret to env.
  Instructions to run Authorship Local for the demo.
  0. Make sure Ollama is installed and that you have pulled the model `llama3.1:8b`. You can pull the model via `ollama pull llama3.1:8b` command
  1. clone the repo
