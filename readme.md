@@ -1,7 +1,7 @@
 # authorship-local
 
  Instructions to run Authorship Local for the demo.
-
+ 0. Make sure Ollama is installed and that you have pulled the model `llama3.1:8b`. You can pull the model via `ollama pull llama3.1:8b` command
  1. clone the repo
  2. Open Command Prompt on your windows computer
  3. In the working directory, create a virtual environment `python -m venv venv`
