@@ -143,7 +143,7 @@ def setup_runnable():
     memory = cl.user_session.get("memory")  # type: ConversationBufferMemory
     model = ChatOpenAI(
         openai_api_base="http://localhost:11434/v1",  # Adjust if your Ollama endpoint is different
-        openai_api_key="",  # Ollama doesn’t require an API key
+         # Ollama doesn’t require an API key
         model_name="llama3.1:8b",  # Replace with the exact model name as configured in Ollama
         streaming=True,
     )
