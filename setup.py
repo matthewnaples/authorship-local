@@ -15,11 +15,42 @@ class SetupStep(Enum):
     CREATE_EXECUTABLE = auto()
     ALL = auto()
 
-def run_command(command, shell=True):
-    """Run a command and return its output"""
+def run_command(command, shell=True, show_output=False):
+    """Run a command and return its output
+    
+    Args:
+        command: The command to run
+        shell: Whether to run the command in a shell
+        show_output: Whether to show real-time output in the terminal
+    """
     try:
-        result = subprocess.run(command, shell=shell, check=True, capture_output=True, text=True)
-        return result.stdout
+        if show_output:
+            # Run with output displayed in real-time
+            process = subprocess.Popen(
+                command,
+                shell=shell,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            output_lines = []
+            for line in process.stdout:
+                print(line, end='')  # Print in real-time
+                output_lines.append(line)
+            
+            process.wait()
+            if process.returncode != 0:
+                print(f"Error: Command '{command}' failed with return code {process.returncode}")
+                sys.exit(1)
+            
+            return ''.join(output_lines)
+        else:
+            # Run with captured output
+            result = subprocess.run(command, shell=shell, check=True, capture_output=True, text=True)
+            return result.stdout
     except subprocess.CalledProcessError as e:
         print(f"Error running command '{command}': {e}")
         print(f"Error output: {e.stderr}")
@@ -48,7 +79,7 @@ class Setup:
     def install_requirements(self):
         """Step 2: Install requirements"""
         print("Installing requirements...")
-        run_command(f'"{self.python_path}" -m pip install -r requirements.txt')
+        run_command(f'"{self.python_path}" -m pip install -r requirements.txt', show_output=True)
 
     def create_chainlit_secret(self):
         """Step 3: Create Chainlit secret"""
@@ -74,7 +105,7 @@ OPENAI_API_KEY="fake_key"
     def create_executable(self):
         """Step 5: Create executable"""
         print("Creating executable...")
-        run_command(f'"{self.python_path}" -m PyInstaller authorship.spec')
+        run_command(f'"{self.python_path}" -m PyInstaller authorship.spec', show_output=True)
 
     def print_final_instructions(self):
         """Print instructions for running the server"""
