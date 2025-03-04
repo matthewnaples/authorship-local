@@ -88,9 +88,35 @@ OPENAI_API_KEY="fake_key"
         print("2. Once the server is running, you can run the executable from the dist directory")
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Setup script for Authorship Local')
-    parser.add_argument('--start-step', type=str, choices=[step.name.lower() for step in SetupStep],
-                      help='Start setup from a specific step', default='all')
+    parser = argparse.ArgumentParser(
+        description='Setup script for Authorship Local',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='''
+Examples:
+  Run all steps (default):
+    python setup.py
+    python setup.py --start-step all
+
+  Start from a specific step:
+    python setup.py --start-step install_requirements
+    python setup.py --start-step create_chainlit_secret
+
+Available steps (in order):
+  - create_venv
+  - install_requirements
+  - create_chainlit_secret
+  - create_env_file
+  - create_executable
+  - all (default)
+''')
+    parser.add_argument(
+        '--start-step',
+        type=str,
+        choices=[step.name.lower() for step in SetupStep],
+        help='Start setup from a specific step (default: all)',
+        default='all',
+        metavar='STEP'
+    )
     return parser.parse_args()
 
 def main():
