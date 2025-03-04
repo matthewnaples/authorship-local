@@ -15,15 +15,24 @@ class SetupStep(Enum):
     CREATE_EXECUTABLE = auto()
     ALL = auto()
 
-def run_command(command, shell=True, show_output=False):
+def run_command(command, shell=True, show_output=False, activate_venv=False):
     """Run a command and return its output
     
     Args:
         command: The command to run
         shell: Whether to run the command in a shell
         show_output: Whether to show real-time output in the terminal
+        activate_venv: Whether to run the command with activated virtual environment
     """
     try:
+        if activate_venv:
+            # Construct the activation command based on the platform
+            if sys.platform == "win32":
+                activate_cmd = f'"{Path.cwd() / "venv" / "Scripts" / "activate.bat"}" && '
+            else:
+                activate_cmd = f'source "{Path.cwd() / "venv" / "bin" / "activate"}" && '
+            command = activate_cmd + command
+
         if show_output:
             # Run with output displayed in real-time
             process = subprocess.Popen(
@@ -105,7 +114,52 @@ OPENAI_API_KEY="fake_key"
     def create_executable(self):
         """Step 5: Create executable"""
         print("Creating executable...")
-        run_command(f'"{self.python_path}" -m PyInstaller authorship.spec', show_output=True)
+        try:
+            # Ensure the dist directory exists and is empty
+            dist_dir = self.current_dir / "dist"
+            if dist_dir.exists():
+                print("Cleaning dist directory...")
+                for item in dist_dir.iterdir():
+                    if item.is_file():
+                        item.unlink()
+                    elif item.is_dir():
+                        import shutil
+                        shutil.rmtree(item)
+            else:
+                dist_dir.mkdir(parents=True)
+
+            # Ensure the build directory is clean
+            build_dir = self.current_dir / "build"
+            if build_dir.exists():
+                print("Cleaning build directory...")
+                import shutil
+                shutil.rmtree(build_dir)
+
+            # Run PyInstaller with absolute paths and activated virtual environment
+            spec_file = self.current_dir / "authorship.spec"
+            if not spec_file.exists():
+                print(f"Error: Could not find spec file at {spec_file}")
+                sys.exit(1)
+
+            print("Running PyInstaller with activated virtual environment...")
+            command = f'pyinstaller "{spec_file}" --clean'
+            run_command(command, show_output=True, activate_venv=True)
+
+            # Verify the executable was created
+            if sys.platform == "win32":
+                exe_path = dist_dir / "Authorship.exe"
+            else:
+                exe_path = dist_dir / "Authorship"
+
+            if not exe_path.exists():
+                print(f"Error: Executable was not created at expected path: {exe_path}")
+                sys.exit(1)
+
+            print(f"Successfully created executable at: {exe_path}")
+
+        except Exception as e:
+            print(f"Error creating executable: {str(e)}")
+            sys.exit(1)
 
     def print_final_instructions(self):
         """Print instructions for running the server"""
